@@ -1,0 +1,13 @@
+Time elapsed (hh:mm:ss): 04:02:07
+Number of models trained: 180
+Average time per model (hh:mm:ss): 00:00:16
+
+Parameters: 
+Iters per model = 5
+First layer size options = [3, 4, 5]
+Second layer size options = [2, 4, 6]
+Learning rate options = [0.1, 0.01, 0.001, 0.0001]
+Max epochs = 1500
+
+Best case average mse:  0.0013391255401074887 | first_layer_size:  5 | second_layer_size:  4 | learning_rate:  0.1 | average_training_time:  8.259656763076782 | average_number_of_epochs:  75.2
+Worst case average mse:  0.022229235246777536 | first_layer_size:  3 | second_layer_size:  2 | learning_rate:  0.0001 | average_training_time:  157.57492942810057 | average_number_of_epochs:  1205.2
