@@ -1,0 +1,20 @@
+Time elapsed (hh:mm:ss): 00:40:36
+Number of models trained: 6
+Average time per model (hh:mm:ss): 00:06:45
+
+Parameters: 
+Iters per model = 3
+First layer size options = 5
+Second layer size options = [3]
+Learning rate options = 0.1
+Regularization parameter options = [1e-09, 1e-10]
+Noise desviation options = [0.15]
+Max epochs = 3000
+
+Best case average mse:  0.013367457936207453 | first_layer_size:  5 | second_layer_size:  3 | learning_rate:  0.1 | reg_parameter:  1e-09 | noise_desviation:  0.15 | average_training_time:  343.568727016449 | average_number_of_epochs:  3000.0
+Worst case average mse:  0.02293689859410127 | first_layer_size:  5 | second_layer_size:  3 | learning_rate:  0.1 | reg_parameter:  1e-09 | noise_desviation:  0.15 | average_training_time:  468.3864274819692 | average_number_of_epochs:  3000.0
+
+ -------------------All models------------------- 
+
+Best case average mse:  0.013367457936207453 | first_layer_size:  5 | second_layer_size:  3 | learning_rate:  0.1 | reg_parameter:  1e-09 | noise_desviation:  0.15 | average_training_time:  343.568727016449 | average_number_of_epochs:  3000.0
+Best case average mse:  0.02293689859410127 | first_layer_size:  5 | second_layer_size:  3 | learning_rate:  0.1 | reg_parameter:  1e-10 | noise_desviation:  0.15 | average_training_time:  468.3864274819692 | average_number_of_epochs:  3000.0
