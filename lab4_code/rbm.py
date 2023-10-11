@@ -65,7 +65,7 @@ class RestrictedBoltzmannMachine():
         return
 
         
-    def cd1(self,visible_trainset, n_iterations=10000):
+    def cd1(self, visible_trainset, n_iterations=10000):
         
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
 
@@ -78,14 +78,22 @@ class RestrictedBoltzmannMachine():
         
         n_samples = visible_trainset.shape[0]
 
+        v_0 = visible_trainset[:self.batch_size]
+
         for it in range(n_iterations):
 
-	    # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
+	        # [TODO TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
             # you may need to use the inference functions 'get_h_given_v' and 'get_v_given_h'.
             # note that inference methods returns both probabilities and activations (samples from probablities) and you may have to decide when to use what.
 
-            # [TODO TASK 4.1] update the parameters using function 'update_params'
+            h_0_prob, h_0_bin = get_h_given_v(v_0)
+            v_1_prob, v_1_bin = get_v_given_h(h_0_prob)
+            h_1_prob, h_1_bin = get_h_given_v(v_1_bin)
             
+            # [TODO TASK 4.1] update the parameters using function 'update_params'
+
+            update_params(v_0, h_0_bin, v_1_prob, h_1_prob)
+
             # visualize once in a while when visible layer is input images
             
             if it % self.rf["period"] == 0 and self.is_bottom:
@@ -115,11 +123,13 @@ class RestrictedBoltzmannMachine():
            all args have shape (size of mini-batch, size of respective layer)
         """
 
-        # [TODO TASK 4.1] get the gradients from the arguments (replace the 0s below) and update the weight and bias parameters
+        # [DONE TASK 4.1] get the gradients from the arguments (replace the 0s below) and update the weight and bias parameters
         
-        self.delta_bias_v += 0
-        self.delta_weight_vh += 0
-        self.delta_bias_h += 0
+        self.delta_bias_v += np.mean(v_0 - v_k, axis=0)
+        self.delta_weight_vh += (v_0.T @ h_0 - v_k.T @ h_k) / v_0.shape[0]
+        self.delta_bias_h += np.mean(h_0 - h_k, axis=0)
+
+        assert self.delta_bias_v.shape[0] == v_0.shape[1]
         
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
