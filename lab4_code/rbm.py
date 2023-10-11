@@ -125,9 +125,9 @@ class RestrictedBoltzmannMachine():
 
         # [DONE TASK 4.1] get the gradients from the arguments (replace the 0s below) and update the weight and bias parameters
         
-        self.delta_bias_v += np.mean(v_0 - v_k, axis=0)
-        self.delta_weight_vh += (v_0.T @ h_0 - v_k.T @ h_k) / v_0.shape[0]
-        self.delta_bias_h += np.mean(h_0 - h_k, axis=0)
+        self.delta_bias_v +=self.learning_rate * np.mean(v_0 - v_k, axis=0)
+        self.delta_weight_vh +=self.learning_rate * (v_0.T @ h_0 - v_k.T @ h_k) / v_0.shape[0]
+        self.delta_bias_h += self.learning_rate * np.mean(h_0 - h_k, axis=0)
 
         assert self.delta_bias_v.shape[0] == v_0.shape[1]
         
@@ -137,7 +137,7 @@ class RestrictedBoltzmannMachine():
         
         return
 
-    def get_h_given_v(self,visible_minibatch):
+    def get_h_given_v(self, visible_minibatch):
         
         """Compute probabilities p(h|v) and activations h ~ p(h|v) 
 
@@ -155,8 +155,11 @@ class RestrictedBoltzmannMachine():
         n_samples = visible_minibatch.shape[0]
 
         # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of hidden layer (replace the zeros below) 
+
+        probs = sigmoid(- visible_minibatch @ self.weight_vh - self.bias_h[:, np.newaxis])
+        binary_states = np.random.binomial(1, probs, size=None)
         
-        return np.zeros((n_samples,self.ndim_hidden)), np.zeros((n_samples,self.ndim_hidden))
+        return probs, binary_states
 
 
     def get_v_given_h(self,hidden_minibatch):
@@ -188,15 +191,19 @@ class RestrictedBoltzmannMachine():
             # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass below). \
             # Note that this section can also be postponed until TASK 4.2, since in this task, stand-alone RBMs do not contain labels in visible layer.
             
+            
             pass
             
         else:
                         
-            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)             
+            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)
+
+            probs = sigmoid(- hidden_minibatch @ self.weight_vh.T - self.bias_v[:, np.newaxis])
+            binary_states = np.random.binomial(1, probs, size=None)             
 
             pass
         
-        return np.zeros((n_samples,self.ndim_visible)), np.zeros((n_samples,self.ndim_visible))
+        return probs, binary_states
 
 
     
