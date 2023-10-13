@@ -57,7 +57,7 @@ class RestrictedBoltzmannMachine():
         self.print_period = 5000
         
         self.rf = { # receptive-fields. Only applicable when visible layer is input data
-            "period" : 5000, # iteration period to visualize
+            "period" : 7500, # iteration period to visualize
             "grid" : [5,5], # size of the grid
             "ids" : np.random.randint(0,self.ndim_hidden,25) # pick some random hidden units
             }
@@ -77,6 +77,10 @@ class RestrictedBoltzmannMachine():
         print ("learning CD1")
         
         n_samples = visible_trainset.shape[0]
+
+        n_epochs = 15
+        n_iterations = int(n_samples / self.batch_size) * n_epochs
+        print("Running for {} iterations".format(n_iterations))
         index = 0 
 
         for it in range(n_iterations):
@@ -87,7 +91,7 @@ class RestrictedBoltzmannMachine():
                 v_0 = visible_trainset[index:next_index]
             else:
                 v_0 = np.concatenate((visible_trainset[index:],visible_trainset[:next_index-n_samples]))
-                print(index)
+                # print(index)
             index = next_index % n_samples
 
 	        # [Done TASK 4.1] run k=1 alternating Gibbs sampling : v_0 -> h_0 ->  v_1 -> h_1.
@@ -103,15 +107,19 @@ class RestrictedBoltzmannMachine():
 
             # visualize once in a while when visible layer is input images
             
-            if it % self.rf["period"] == 0 and self.is_bottom:
-                
+            if (it % self.rf["period"] == 0 or it == n_iterations - 1)and self.is_bottom:
                 viz_rf(weights=self.weight_vh[:,self.rf["ids"]].reshape((self.image_size[0],self.image_size[1],-1)), it=it, grid=self.rf["grid"])
 
             # print progress
             
-            if it % self.print_period == 0 :
+            
 
-                print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(visible_trainset - visible_trainset)))
+            if it % self.print_period == 0 :
+                h_0_prob, h_0_bin = self.get_h_given_v(visible_trainset)
+                v_1_prob, v_1_bin = self.get_v_given_h(h_0_bin)
+                # print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(visible_trainset - visible_trainset)))
+                print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(v_1_prob - visible_trainset)))
+
         
         return
     
@@ -203,7 +211,7 @@ class RestrictedBoltzmannMachine():
             
         else:
                         
-            # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)
+            # [DONE TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)
 
             probs = sigmoid(hidden_minibatch @ self.weight_vh.T + self.bias_v)
             binary_states = np.random.binomial(1, probs, size=None)             
