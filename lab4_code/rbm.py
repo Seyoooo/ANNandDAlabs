@@ -60,7 +60,7 @@ class RestrictedBoltzmannMachine():
             "period" : 7500, # iteration period to visualize
             "grid" : [5,5], # size of the grid
             "ids" : np.random.randint(0,self.ndim_hidden,25) # pick some random hidden units
-            }
+        }
         
         return
 
@@ -109,6 +109,7 @@ class RestrictedBoltzmannMachine():
             
             if (it % self.rf["period"] == 0 or it == n_iterations - 1)and self.is_bottom:
                 viz_rf(weights=self.weight_vh[:,self.rf["ids"]].reshape((self.image_size[0],self.image_size[1],-1)), it=it, grid=self.rf["grid"])
+                # selects the weights of 25 random hidden units and plots the respective magnitude of weights
 
             # print progress
             
@@ -121,8 +122,15 @@ class RestrictedBoltzmannMachine():
                 print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(v_1_prob - visible_trainset)))
 
         
+
         return
     
+
+    def reconstruct(self, sample):
+        h_0_prob, h_0_bin = self.get_h_given_v(sample)
+        v_1_prob, v_1_bin = self.get_v_given_h(h_0_bin)
+        return v_1_prob
+
 
     def update_params(self,v_0,h_0,v_k,h_k):
 

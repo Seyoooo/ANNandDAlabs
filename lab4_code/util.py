@@ -99,7 +99,7 @@ def read_mnist(dim=[28,28],n_train=60000,n_test=1000):
 
     return train_imgs[:n_train],train_lbls_1hot[:n_train],test_imgs[:n_test],test_lbls_1hot[:n_test]
 
-def viz_rf(weights,it,grid):
+def viz_rf(weights, it, grid):
 
     """
     Visualize receptive fields and save 
@@ -122,3 +122,15 @@ def stitch_video(fig,imgs):
     import matplotlib.animation as animation
     
     return animation.ArtistAnimation(fig, imgs, interval=100, blit=True, repeat=False)    
+
+def visualize_image(encoded_image):
+    if len(encoded_image) != 784:
+        raise ValueError("The input vector must have 784 elements to represent a 24x24 image.")
+    
+    # Reshape the 784-sized vector into a 24x24 matrix
+    image_matrix = np.reshape(encoded_image, (28, 28))
+
+    # Display the image using matplotlib
+    plt.imshow(image_matrix, cmap='gray')
+    plt.axis('off')  # Hide axis ticks and labels
+    plt.show()
