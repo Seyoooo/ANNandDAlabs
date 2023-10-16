@@ -20,7 +20,7 @@ if __name__ == "__main__":
                                      batch_size=20
     )
     
-    rbm.cd1(visible_trainset=train_imgs, n_iterations=10000)
+    rbm.cd1(visible_trainset=train_imgs, n_epochs=15)
 
     print("Predicting for sample x.")
     visualize_image(test_imgs[99])

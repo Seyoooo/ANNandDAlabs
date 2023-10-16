@@ -111,7 +111,7 @@ def viz_rf(weights, it, grid):
         for y in range(grid[1]):
             axs[x,y].set_xticks([]);
             axs[x,y].set_yticks([]);
-            axs[x,y].imshow(weights[:,:,y+grid[1]*x], cmap="bwr", vmin=-imax, vmax=imax, interpolation=None)
+            axs[x,y].imshow(weights[:,:,y+grid[1]*x], cmap="Greys", vmin=-imax, vmax=imax, interpolation=None)
     plt.savefig("rf.iter%06d.png"%it)
     plt.close('all')
 
