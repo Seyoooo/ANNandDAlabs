@@ -78,7 +78,7 @@ class RestrictedBoltzmannMachine():
         
         n_samples = visible_trainset.shape[0]
 
-        n_epochs = 15
+        n_epochs = 2
         n_iterations = int(n_samples / self.batch_size) * n_epochs
         print("Running for {} iterations".format(n_iterations))
         index = 0 
@@ -213,10 +213,30 @@ class RestrictedBoltzmannMachine():
 
             # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass below). \
             # Note that this section can also be postponed until TASK 4.2, since in this task, stand-alone RBMs do not contain labels in visible layer.
-            
-            
-            pass
-            
+                   
+            #=========================================================================
+
+            # Compute the total input for each unit in the visible layer
+            total_input = hidden_minibatch @ self.weight_vh.T + self.bias_v
+
+            # Split the total input into two parts: data and labels
+            data_input = total_input[:, :-self.n_labels]
+            label_input = total_input[:, -self.n_labels:]
+
+            # Compute probabilities and activations for both data and labels
+            data_probs = sigmoid(data_input)
+            label_probs = sigmoid(label_input)
+
+            # Sample binary states for data and labels
+            data_states = np.random.binomial(1, data_probs)
+            label_states = np.random.binomial(1, label_probs)
+
+            # Concatenate data and labels to form the visible layer
+            visible_layer = np.concatenate((data_states, label_states), axis=1)
+
+            return visible_layer, visible_layer
+            #=========================================================================
+
         else:
                         
             # [DONE TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass and zeros below)
@@ -259,7 +279,18 @@ class RestrictedBoltzmannMachine():
 
         # [TODO TASK 4.2] perform same computation as the function 'get_h_given_v' but with directed connections (replace the zeros below) 
         
-        return np.zeros((n_samples,self.ndim_hidden)), np.zeros((n_samples,self.ndim_hidden))
+        #=========================================================================
+        # Compute the total input to the hidden layer using directed weights and bias
+        total_input = visible_minibatch @ self.weight_v_to_h.T + self.bias_h
+
+        # Compute the probabilities using an activation function, such as sigmoid
+        probs = sigmoid(total_input)
+
+        # Sample binary states from the computed probabilities
+        binary_states = np.random.binomial(1, probs)
+
+        return probs, binary_states
+        #=========================================================================
 
 
     def get_v_given_h_dir(self,hidden_minibatch):
@@ -292,16 +323,24 @@ class RestrictedBoltzmannMachine():
             # [TODO TASK 4.2] Note that even though this function performs same computation as 'get_v_given_h' but with directed connections,
             # this case should never be executed : when the RBM is a part of a DBN and is at the top, it will have not have directed connections.
             # Appropriate code here is to raise an error (replace pass below)
+            #=========================================================================
+            raise ValueError("In a top RBM with directed connections, p(v|h) computation is not supported.")
+            #=========================================================================
             
-            pass
-            
-        else:
-                        
+        else:   
             # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)             
+            #=========================================================================
+            total_input = hidden_minibatch @ self.weight_h_to_v.T + self.bias_v
 
-            pass
+            # Compute probabilities using an activation function, such as sigmoid
+            probs = sigmoid(total_input)
+
+            # Sample binary states from the computed probabilities
+            binary_states = np.random.binomial(1, probs)
+
+            return probs, binary_states
+            #=========================================================================
             
-        return np.zeros((n_samples,self.ndim_visible)), np.zeros((n_samples,self.ndim_visible))        
         
     def update_generate_params(self,inps,trgs,preds):
         
