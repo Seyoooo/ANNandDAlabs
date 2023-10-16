@@ -78,7 +78,7 @@ class RestrictedBoltzmannMachine():
         
         n_samples = visible_trainset.shape[0]
 
-        n_epochs = 2
+        n_epochs = 2 # 15
         n_iterations = int(n_samples / self.batch_size) * n_epochs
         print("Running for {} iterations".format(n_iterations))
         index = 0 

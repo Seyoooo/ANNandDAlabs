@@ -37,6 +37,8 @@ if __name__ == "__main__":
 
     dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=100)
 
+    ''' recognize test data '''
+
     dbn.recognize(train_imgs, train_lbls)
     
     dbn.recognize(test_imgs, test_lbls)

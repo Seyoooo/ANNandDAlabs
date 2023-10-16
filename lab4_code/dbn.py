@@ -77,7 +77,7 @@ class DeepBeliefNet():
             vis = self.rbm_stack["vis--hid"].get_h_given_v(vis)[1]
             vis = self.rbm_stack["hid--pen"].get_h_given_v(vis)[1]
             vis = np.concatenate((vis, lbl), axis=1)
-            lbl = self.rbm_stack["pen+lbl--top"].get_h_given_v(vis)[1][:, -self.n_labels:]
+            lbl = self.rbm_stack["pen+lbl--top"].get_h_given_v(vis)[1][:, -true_lbl.shape[0]:]
             #===================================================================================================
 
         predicted_lbl = np.zeros(true_lbl.shape)
@@ -125,9 +125,9 @@ class DeepBeliefNet():
         Notice that once you stack more layers on top of a RBM, the weights are permanently untwined.
 
         Args:
-          vis_trainset: visible data shaped (size of training set, size of visible layer)
-          lbl_trainset: label data shaped (size of training set, size of label layer)
-          n_iterations: number of iterations of learning (each iteration learns a mini-batch)
+        vis_trainset: visible data shaped (size of training set, size of visible layer)
+        lbl_trainset: label data shaped (size of training set, size of label layer)
+        n_iterations: number of iterations of learning (each iteration learns a mini-batch)
         """
 
         try :
@@ -141,44 +141,48 @@ class DeepBeliefNet():
             self.loadfromfile_rbm(loc="trained_rbm",name="pen+lbl--top")        
 
         except IOError :
-
-            # [TODO TASK 4.2] use CD-1 to train all RBMs greedily
-            #===================================================================================================
-            # for rbm_name in self.rbm_stack:
-            #     current_rbm = self.rbm_stack[rbm_name]
-            #     print(f"Training {rbm_name}")
-
-            #     # Perform CD-1 training for the current RBM
-            #     current_rbm.cd1(vis_trainset if not current_rbm.is_top else np.hstack((vis_trainset, lbl_trainset)), n_iterations)
-
-            #     # Untwine weights for the next RBM in the stack
-            #     if rbm_name != "pen+lbl--top":
-            #         current_rbm.untwine_weights()
-            #     else:
-            #         # Save the trained parameters for the top RBM
-            #         self.savetofile_rbm(loc="trained_rbm", name="pen+lbl--top")
-
-
+            # If previously trained parameters are not found, perform greedy layer-wise training
 
             print("training vis--hid")
             """
-            CD-1 training for vis--hid 
+            CD-1 training for vis--hid
             """
             self.rbm_stack["vis--hid"].cd1(vis_trainset, n_iterations)
 
+            # Save trained parameters for vis--hid
+            self.savetofile_rbm(loc="trained_rbm", name="vis--hid")
+
             print("training hid--pen")
-            """ 
-            CD-1 training for hid--pen 
             """
-            self.rbm_stack["hid--pen"].cd1(self.rbm_stack["vis--hid"].get_h_given_v(vis_trainset)[1], n_iterations)
+            CD-1 training for hid--pen
+            """
+            # Get hidden layer activations from vis--hid for use in hid--pen
+            hidden_activations = self.rbm_stack["vis--hid"].get_h_given_v(vis_trainset)[1]
+            self.rbm_stack["hid--pen"].cd1(hidden_activations, n_iterations)
+
+            # Untwine the weights for the next layer
+            self.rbm_stack["vis--hid"].untwine_weights()
+
+            # Save trained parameters for hid--pen
+            self.savetofile_rbm(loc="trained_rbm", name="hid--pen")
 
             print("training pen+lbl--top")
-            """ 
-            CD-1 training for pen+lbl--top 
             """
-            v_hidden = np.concatenate((self.rbm_stack["hid--pen"].get_h_given_v(vis_trainset)[1], lbl_trainset), axis=1)
-            self.rbm_stack["pen+lbl--top"].cd1(v_hidden, n_iterations)            
-            #===================================================================================================
+            CD-1 training for pen+lbl--top
+            """
+            # Get hidden layer activations from hid--pen
+            hidden_activations = self.rbm_stack["hid--pen"].get_h_given_v(hidden_activations)[1]
+
+            # Concatenate labels with activations for pen+lbl--top
+            visible_data = np.concatenate((hidden_activations, lbl_trainset), axis=1)
+            self.rbm_stack["pen+lbl--top"].cd1(visible_data, n_iterations)
+
+            # Untwine the weights for the next layer
+            self.rbm_stack["hid--pen"].untwine_weights()
+
+            # Save trained parameters for pen+lbl--top
+            self.savetofile_rbm(loc="trained_rbm", name="pen+lbl--top")
+
         return    
 
     def train_wakesleep_finetune(self, vis_trainset, lbl_trainset, n_iterations):
