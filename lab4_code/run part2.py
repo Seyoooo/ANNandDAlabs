@@ -35,13 +35,16 @@ if __name__ == "__main__":
     
     ''' greedy layer-wise training '''
 
-    dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=100)
+    dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3)
 
     ''' recognize test data '''
 
+    print(f"Recognizing test data")
     dbn.recognize(train_imgs, train_lbls)
     
     dbn.recognize(test_imgs, test_lbls)
+
+    
 
     for digit in range(10):
         digit_1hot = np.zeros(shape=(1,10))
