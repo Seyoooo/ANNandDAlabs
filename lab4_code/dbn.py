@@ -71,16 +71,23 @@ class DeepBeliefNet():
         # and read out the labels (replace pass below and 'predicted_lbl' to your predicted labels).
         # NOTE : inferring entire train/test set may require too much compute memory (depends on your system). In that case, divide into mini-batches.
         
-        for _ in range(self.n_gibbs_recog):
-            #===================================================================================================
-            # Propagate the visible layer data through the RBMs from bottom to top
-            vis = self.rbm_stack["vis--hid"].get_h_given_v(vis)[1]
-            vis = self.rbm_stack["hid--pen"].get_h_given_v(vis)[1]
-            vis = np.concatenate((vis, lbl), axis=1)
-            lbl = self.rbm_stack["pen+lbl--top"].get_h_given_v(vis)[1][:, -true_lbl.shape[0]:]
-            #===================================================================================================
+        # Propagate the visible layer data through the RBMs from bottom to top
+        vis = self.rbm_stack["vis--hid"].get_h_given_v_dir(vis)[1]
+        vis = self.rbm_stack["hid--pen"].get_h_given_v_dir(vis)[1]
+        vis = np.concatenate((vis, lbl), axis=1)
+        for i in range(self.n_gibbs_recog):
+            # Gibs learning for the top RBM
+            h_0_prob, _ = self.rbm_stack["pen+lbl--top"].get_h_given_v(vis)
+            if i == self.n_gibbs_recog - 1:
+                # We don't take the probabilities!!
+                _, vis = self.rbm_stack["pen+lbl--top"].get_v_given_h(h_0_prob)
+            else:
+                vis, _ = self.rbm_stack["pen+lbl--top"].get_v_given_h(h_0_prob)
+            print(f'Gibs iteration nb {i}')
+        
+        predicted_lbl = self.rbm_stack["pen+lbl--top"].get_h_given_v(vis)[1][:, -true_lbl.shape[0]:]
 
-        predicted_lbl = np.zeros(true_lbl.shape)
+        print(predicted_lbl)
             
         print ("accuracy = %.2f%%"%(100.*np.mean(np.argmax(predicted_lbl,axis=1)==np.argmax(true_lbl,axis=1))))
         

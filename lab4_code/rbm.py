@@ -281,7 +281,7 @@ class RestrictedBoltzmannMachine():
         
         #=========================================================================
         # Compute the total input to the hidden layer using directed weights and bias
-        total_input = visible_minibatch @ self.weight_v_to_h.T + self.bias_h
+        total_input = visible_minibatch @ self.weight_v_to_h + self.bias_h
 
         # Compute the probabilities using an activation function, such as sigmoid
         probs = sigmoid(total_input)
