@@ -65,7 +65,7 @@ class RestrictedBoltzmannMachine():
         return
 
         
-    def cd1(self, visible_trainset, n_iterations=10000):
+    def cd1(self, visible_trainset, n_iterations=10000, n_epochs = 15):
         
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
 
@@ -78,7 +78,7 @@ class RestrictedBoltzmannMachine():
         
         n_samples = visible_trainset.shape[0]
 
-        n_epochs = 2 # 15
+
         n_iterations = int(n_samples / self.batch_size) * n_epochs
         print("Running for {} iterations".format(n_iterations))
         index = 0 
@@ -119,7 +119,7 @@ class RestrictedBoltzmannMachine():
                 h_0_prob, h_0_bin = self.get_h_given_v(visible_trainset)
                 v_1_prob, v_1_bin = self.get_v_given_h(h_0_bin)
                 # print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(visible_trainset - visible_trainset)))
-                print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(v_1_prob - visible_trainset)))
+                print ("iteration=%7d recon_loss=%4.4f"%(it, np.linalg.norm(v_1_prob - visible_trainset)/n_samples))
 
         
 
@@ -261,7 +261,7 @@ class RestrictedBoltzmannMachine():
         self.weight_vh = None
 
     def get_h_given_v_dir(self,visible_minibatch):
-
+ 
         """Compute probabilities p(h|v) and activations h ~ p(h|v)
 
         Uses directed weight "weight_v_to_h" and bias "bias_h"
@@ -281,7 +281,7 @@ class RestrictedBoltzmannMachine():
         
         #=========================================================================
         # Compute the total input to the hidden layer using directed weights and bias
-        total_input = visible_minibatch @ self.weight_v_to_h + self.bias_h
+        total_input = visible_minibatch @ self.weight_h_to_v.T + self.bias_h
 
         # Compute the probabilities using an activation function, such as sigmoid
         probs = sigmoid(total_input)
@@ -328,9 +328,9 @@ class RestrictedBoltzmannMachine():
             #=========================================================================
             
         else:   
-            # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)             
+            # [TODO TASK 4.2] performs same computation as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)             
             #=========================================================================
-            total_input = hidden_minibatch @ self.weight_h_to_v.T + self.bias_v
+            total_input = hidden_minibatch @ self.weight_v_to_h.T + self.bias_v
 
             # Compute probabilities using an activation function, such as sigmoid
             probs = sigmoid(total_input)
